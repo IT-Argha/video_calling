@@ -11,6 +11,9 @@
         <div id="join-screen" class="screen">
             <div class="join-container">
                 <h1>Video Call</h1>
+                <div class="name-input">
+                    <input type="text" id="user-name-input" placeholder="Enter your name" class="input" maxlength="20">
+                </div>
                 <div class="join-options">
                     <button id="create-room-btn" class="btn primary">Create Room</button>
                     <div class="join-room">
@@ -42,6 +45,7 @@
             </div>
 
             <div id="status">Status: Waiting for user</div>
+            <div id="connection-indicator" class="connection-not-established">● Connection not established</div>
             <div id="timer">00:00</div>
 
             <div id="room-info" class="hidden">
