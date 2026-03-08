@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp-Style Video Call</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="join-screen" class="screen">
+            <div class="join-container">
+                <h1>Video Call</h1>
+                <div class="join-options">
+                    <button id="create-room-btn" class="btn primary">Create Room</button>
+                    <div class="join-room">
+                        <input type="text" id="room-id-input" placeholder="Enter Room ID" class="input">
+                        <button id="join-room-btn" class="btn secondary">Join Room</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="call-screen" class="screen hidden">
+            <div id="videos">
+                <video id="remote-video" autoplay playsinline></video>
+                <video id="local-video" autoplay playsinline muted></video>
+            </div>
+
+            <div id="controls">
+                <button id="mic-btn" class="control-btn" title="Mute/Unmute Mic">🎤</button>
+                <button id="cam-btn" class="control-btn" title="Camera On/Off">📷</button>
+                <button id="screen-share-btn" class="control-btn" title="Screen Share">📺</button>
+                <button id="chat-btn" class="control-btn" title="Toggle Chat">💬</button>
+                <button id="end-call-btn" class="control-btn end" title="End Call">❌</button>
+            </div>
+
+            <div id="chat-panel" class="hidden">
+                <div id="chat-messages"></div>
+                <input type="text" id="chat-input" placeholder="Type a message..." />
+                <button id="send-chat-btn">Send</button>
+            </div>
+
+            <div id="status">Status: Waiting for user</div>
+            <div id="timer">00:00</div>
+
+            <div id="room-info" class="hidden">
+                <p>Room ID: <span id="room-id-display"></span> <button id="copy-room-btn">Copy</button></p>
+                <div id="initiator-controls">
+                    <p>Copy this offer and send to the other user:</p>
+                    <textarea id="offer-text" placeholder="Offer will appear here" readonly></textarea>
+                    <button id="copy-offer-btn" class="btn">Copy Offer</button>
+                    <p>Paste the answer here:</p>
+                    <textarea id="answer-input" placeholder="Paste Answer here"></textarea>
+                    <button id="submit-answer-btn" class="btn">Submit Answer</button>
+                </div>
+                <div id="join-controls" class="hidden">
+                    <p>Paste the offer here:</p>
+                    <textarea id="offer-input" placeholder="Paste Offer here"></textarea>
+                    <button id="submit-offer-btn" class="btn">Submit Offer</button>
+                    <p>Copy this answer and send back:</p>
+                    <textarea id="answer-text" placeholder="Answer will appear here" readonly></textarea>
+                    <button id="copy-answer-btn" class="btn">Copy Answer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
