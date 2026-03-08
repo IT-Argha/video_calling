@@ -48,6 +48,15 @@ body {
     font-size: 2.5em;
 }
 
+.name-input {
+    margin-bottom: 20px;
+}
+
+.name-input .input {
+    width: 100%;
+    max-width: 300px;
+}
+
 .join-options {
     display: flex;
     flex-direction: column;
@@ -191,6 +200,29 @@ body {
     font-size: 0.9em;
 }
 
+#connection-indicator {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: none;
+}
+
+.connection-not-established {
+    background: rgba(255, 71, 87, 0.8);
+    color: white;
+    display: block;
+}
+
+.connection-established {
+    background: rgba(37, 211, 102, 0.8);
+    color: white;
+    display: block;
+}
+
 #timer {
     position: absolute;
     top: 20px;
@@ -286,13 +318,24 @@ textarea::placeholder {
     color: white;
     cursor: pointer;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
     .join-container {
         padding: 20px;
         margin: 20px;
     }
 
     .join-container h1 {
-        font-size: 2em;
+        font-size: 2em;        margin-bottom: 20px;
+    }
+
+    .name-input .input {
+        width: 100%;
+        padding: 12px;    }
+
+    .name-input .input {
+        width: 100%;
     }
 
     .input {
@@ -327,3 +370,110 @@ textarea::placeholder {
         max-width: 250px;
         padding: 15px;
     }
+
+    #connection-indicator {
+        top: 55px;
+        left: 20px;
+        font-size: 0.8em;
+    }
+
+    #chat-panel {
+        width: 200px;
+        height: 250px;
+        bottom: 120px;
+        right: 10px;
+    }
+
+    textarea {
+        height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .join-container {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .join-container h1 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        font-size: 1em;
+    }
+
+    .input {
+        width: 120px;
+        padding: 12px;
+    }
+
+    #local-video {
+        width: 80px;
+        height: 106px;
+        top: 5px;
+        right: 5px;
+        border-width: 2px;
+    }
+
+    #controls {
+        bottom: 15px;
+        gap: 10px;
+        padding: 8px 15px;
+    }
+
+    .control-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3em;
+    }
+
+    #status, #timer {
+        font-size: 0.7em;
+        padding: 6px 12px;
+        top: 10px;
+        left: 10px;
+        right: auto;
+    }
+
+    #timer {
+        right: 10px;
+        left: auto;
+    }
+
+    #connection-indicator {
+        top: 45px;
+        left: 10px;
+        font-size: 0.7em;
+        padding: 4px 10px;
+    }
+
+    #room-info {
+        max-width: 200px;
+        padding: 10px;
+        top: 50px;
+        left: 10px;
+    }
+
+    #chat-panel {
+        width: 180px;
+        height: 200px;
+        bottom: 100px;
+        right: 5px;
+        padding: 10px;
+    }
+
+    #chat-messages {
+        font-size: 12px;
+    }
+
+    #chat-input {
+        padding: 6px;
+    }
+
+    #send-chat-btn {
+        padding: 6px 12px;
+    }
+}
