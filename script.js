@@ -17,6 +17,7 @@ class VideoCallApp {
         this.remoteStream = null;
         this.peerConnection = null;
         this.roomId = null;
+        this.userName = null;
         this.isInitiator = false;
         this.isConnected = false;
         this.callStartTime = null;
@@ -42,10 +43,12 @@ class VideoCallApp {
         this.answerText = document.getElementById('answer-text');
         this.answerInput = document.getElementById('answer-input');
         this.offerInput = document.getElementById('offer-input');
+        this.connectionIndicator = document.getElementById('connection-indicator');
 
         this.createRoomBtn = document.getElementById('create-room-btn');
         this.joinRoomBtn = document.getElementById('join-room-btn');
         this.roomIdInput = document.getElementById('room-id-input');
+        this.userNameInput = document.getElementById('user-name-input');
         this.copyRoomBtn = document.getElementById('copy-room-btn');
         this.copyOfferBtn = document.getElementById('copy-offer-btn');
         this.submitAnswerBtn = document.getElementById('submit-answer-btn');
@@ -174,6 +177,14 @@ class VideoCallApp {
     }
 
     async createRoom() {
+        const userName = this.userNameInput.value.trim();
+        if (!userName) {
+            alert('Please enter your name before joining the call.');
+            this.userNameInput.focus();
+            return;
+        }
+        this.userName = userName;
+
         try {
             this.isInitiator = true;
             this.roomId = this.generateRoomId();
@@ -189,10 +200,10 @@ class VideoCallApp {
             this.setupDataChannel();
 
             this.status.textContent = 'Status: Creating offer...';
-
             const offer = await this.peerConnection.createOffer();
             await this.peerConnection.setLocalDescription(offer);
 
+            this.status.textContent = 'Status: Gathering ICE candidates...';
             // Wait for ICE gathering to complete
             await this.waitForIceGathering();
 
@@ -211,6 +222,14 @@ class VideoCallApp {
     }
 
     async joinRoom() {
+        const userName = this.userNameInput.value.trim();
+        if (!userName) {
+            alert('Please enter your name before joining the call.');
+            this.userNameInput.focus();
+            return;
+        }
+        this.userName = userName;
+
         const roomId = this.roomIdInput.value.trim();
         if (!roomId) {
             alert('Please enter a Room ID');
@@ -225,7 +244,7 @@ class VideoCallApp {
             this.joinControls.classList.remove('hidden');
 
             this.showCallScreen();
-            this.status.textContent = 'Status: Paste offer and submit';
+            this.status.textContent = 'Status: Ready to join room - paste offer and submit';
         } catch (error) {
             console.error('Error joining room:', error);
             alert('Error joining room: ' + error.message);
@@ -234,6 +253,7 @@ class VideoCallApp {
 
     async submitAnswer() {
         try {
+            this.status.textContent = 'Status: Processing answer...';
             const answerData = JSON.parse(this.answerInput.value);
             if (answerData.type === 'answer') {
                 await this.peerConnection.setRemoteDescription(new RTCSessionDescription({
@@ -241,6 +261,7 @@ class VideoCallApp {
                     sdp: answerData.sdp
                 }));
 
+                this.status.textContent = 'Status: Adding ICE candidates...';
                 // Add remote ICE candidates
                 if (answerData.candidates) {
                     for (const candidate of answerData.candidates) {
@@ -248,16 +269,18 @@ class VideoCallApp {
                     }
                 }
 
-                this.status.textContent = 'Status: Answer submitted';
+                this.status.textContent = 'Status: Answer submitted, waiting for connection...';
             }
         } catch (error) {
             console.error('Error submitting answer:', error);
+            this.status.textContent = 'Status: Error processing answer';
             alert('Error submitting answer: ' + error.message);
         }
     }
 
     async submitOffer() {
         try {
+            this.status.textContent = 'Status: Processing offer...';
             const offerData = JSON.parse(this.offerInput.value);
             if (offerData.type === 'offer') {
                 await this.peerConnection.setRemoteDescription(new RTCSessionDescription({
@@ -265,6 +288,7 @@ class VideoCallApp {
                     sdp: offerData.sdp
                 }));
 
+                this.status.textContent = 'Status: Adding ICE candidates...';
                 // Add remote ICE candidates
                 if (offerData.candidates) {
                     for (const candidate of offerData.candidates) {
@@ -272,9 +296,11 @@ class VideoCallApp {
                     }
                 }
 
+                this.status.textContent = 'Status: Creating answer...';
                 const answer = await this.peerConnection.createAnswer();
                 await this.peerConnection.setLocalDescription(answer);
 
+                this.status.textContent = 'Status: Gathering ICE candidates...';
                 // Wait for ICE gathering
                 await this.waitForIceGathering();
 
@@ -297,6 +323,7 @@ class VideoCallApp {
             }
         } catch (error) {
             console.error('Error submitting offer:', error);
+            this.status.textContent = 'Status: Error processing offer';
             alert('Error submitting offer: ' + error.message);
         }
     }
@@ -314,25 +341,39 @@ class VideoCallApp {
         switch (state) {
             case 'new':
                 statusText += 'Waiting for connection';
+                this.connectionIndicator.textContent = '● Connection not established';
+                this.connectionIndicator.className = 'connection-not-established';
                 break;
             case 'connecting':
                 statusText += 'Connecting...';
+                this.connectionIndicator.textContent = '● Connecting...';
+                this.connectionIndicator.className = 'connection-not-established';
                 break;
             case 'connected':
                 statusText += 'Connected';
+                this.connectionIndicator.textContent = '● Connected';
+                this.connectionIndicator.className = 'connection-established';
                 this.isConnected = true;
                 break;
             case 'disconnected':
                 statusText += 'Disconnected';
+                this.connectionIndicator.textContent = '● Connection lost';
+                this.connectionIndicator.className = 'connection-not-established';
                 break;
             case 'failed':
                 statusText += 'Connection failed';
+                this.connectionIndicator.textContent = '● Connection failed';
+                this.connectionIndicator.className = 'connection-not-established';
                 break;
             case 'closed':
                 statusText += 'Call ended';
+                this.connectionIndicator.textContent = '● Call ended';
+                this.connectionIndicator.className = 'connection-not-established';
                 break;
             default:
                 statusText += 'Unknown';
+                this.connectionIndicator.textContent = '● Unknown status';
+                this.connectionIndicator.className = 'connection-not-established';
         }
 
         this.status.textContent = statusText;
@@ -473,54 +514,31 @@ class VideoCallApp {
     }
 
     toggleChat() {
+        const wasHidden = this.chatPanel.classList.contains('hidden');
         this.chatPanel.classList.toggle('hidden');
+        
+        // If opening chat and connection is not established, show warning message
+        if (wasHidden && !this.isConnected) {
+            this.displayMessage('System: Chat not ready yet. Please wait for connection to establish.');
+        }
     }
 
     sendMessage() {
         const message = this.chatInput.value.trim();
         if (!message) return;
 
+        // Check if connection is established
+        if (!this.isConnected || this.peerConnection.connectionState !== 'connected') {
+            this.displayMessage('System: Chat not ready yet. Please wait for connection to establish.');
+            return;
+        }
+
         if (this.dataChannel && this.dataChannel.readyState === 'open') {
             this.dataChannel.send(message);
-            this.displayMessage('You: ' + message);
+            this.displayMessage(this.userName + ': ' + message);
             this.chatInput.value = '';
         } else {
-            // Try to create data channel if it doesn't exist
-            if (!this.dataChannel) {
-                this.dataChannel = this.peerConnection.createDataChannel('chat-' + Date.now());
-                this.setupDataChannel();
-                // Wait a bit for the channel to open
-                setTimeout(() => {
-                    if (this.dataChannel.readyState === 'open') {
-                        this.dataChannel.send(message);
-                        this.displayMessage('You: ' + message);
-                        this.chatInput.value = '';
-                    } else {
-                        this.displayMessage('System: Chat not ready yet. Please wait for connection to establish.');
-                    }
-                }, 1000);
-        } else {
-            // Try to create data channel if it doesn't exist
-            if (!this.dataChannel) {
-                this.displayMessage('System: Establishing chat connection...');
-                this.dataChannel = this.peerConnection.createDataChannel('chat-' + Date.now());
-                this.setupDataChannel();
-                // Wait a bit for the channel to open
-                setTimeout(() => {
-                    if (this.dataChannel && this.dataChannel.readyState === 'open') {
-                        this.dataChannel.send(message);
-                        this.displayMessage('You: ' + message);
-                        this.chatInput.value = '';
-                    } else {
-                        this.displayMessage('System: Chat not ready yet. Please wait for connection to establish.');
-                    }
-                }, 2000);
-            } else if (this.dataChannel.readyState === 'connecting') {
-                this.displayMessage('System: Chat connecting... Please wait.');
-            } else {
-                this.displayMessage('System: Chat not available. Please ensure you are connected to a call.');
-            }
-        }
+            this.displayMessage('System: Chat not ready yet. Please wait for connection to establish.');
         }
     }
 
@@ -533,7 +551,7 @@ class VideoCallApp {
         msgDiv.style.maxWidth = '80%';
         msgDiv.style.wordWrap = 'break-word';
 
-        if (message.startsWith('You:')) {
+        if (this.userName && message.startsWith(this.userName + ':')) {
             msgDiv.style.background = '#25d366';
             msgDiv.style.color = 'white';
             msgDiv.style.alignSelf = 'flex-end';
